@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Icebreaker App</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: sans-serif;
+      background: #f7f0ff;
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 16px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 600px;
+      text-align: center;
+    }
+
+    h1 {
+      font-size: 2.2rem;
+      color: #2d2d2d;
+      margin-bottom: 6px;
+    }
+
+    .subtitle {
+      color: #888;
+      margin-bottom: 32px;
+      font-size: 0.95rem;
+    }
+
+    /* Colourful category boxes */
+    .category-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 12px;
+      margin-bottom: 28px;
+    }
+
+    .category-btn {
+      padding: 20px 8px;
+      border: none;
+      border-radius: 14px;
+      font-size: 0.95rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: transform 0.15s, box-shadow 0.15s, opacity 0.2s;
+      color: white;
+      box-shadow: 0 4px 12px rgba(0,0,0,0.12);
+    }
+
+    .category-btn:hover { transform: translateY(-3px); box-shadow: 0 8px 20px rgba(0,0,0,0.18); }
+    .category-btn.active { outline: 4px solid white; outline-offset: -4px; opacity: 1; }
+    .category-btn:not(.active) { opacity: 0.65; }
+
+    .cat-fun    { background: linear-gradient(135deg, #f7971e, #ffd200); }
+    .cat-work   { background: linear-gradient(135deg, #11998e, #38ef7d); }
+    .cat-deep   { background: linear-gradient(135deg, #6a11cb, #2575fc); }
+    .cat-random { background: linear-gradient(135deg, #f953c6, #b91d73); }
+
+    /* Question card changes colour per category */
+    .question-card {
+      border-radius: 20px;
+      padding: 40px 32px;
+      min-height: 160px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      margin-bottom: 28px;
+      transition: opacity 0.2s, transform 0.2s, background 0.4s;
+      box-shadow: 0 6px 24px rgba(0,0,0,0.13);
+    }
+
+    .question-card p {
+      font-size: 1.25rem;
+      color: white;
+      line-height: 1.7;
+      font-weight: 500;
+    }
+
+    .question-card.cat-fun    { background: linear-gradient(135deg, #f7971e, #ffd200); }
+    .question-card.cat-work   { background: linear-gradient(135deg, #11998e, #38ef7d); }
+    .question-card.cat-deep   { background: linear-gradient(135deg, #6a11cb, #2575fc); }
+    .question-card.cat-random { background: linear-gradient(135deg, #f953c6, #b91d73); }
+    .question-card.cat-default { background: linear-gradient(135deg, #667eea, #764ba2); }
+
+    .question-card.animate {
+      opacity: 0;
+      transform: scale(0.96);
+    }
+
+    .btn-row {
+      display: flex;
+      gap: 12px;
+      justify-content: center;
+      flex-wrap: wrap;
+      margin-bottom: 8px;
+    }
+
+    .next-btn {
+      padding: 13px 36px;
+      background: #2d2d2d;
+      color: white;
+      border: none;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: background 0.2s, transform 0.1s;
+    }
+
+    .next-btn:hover { background: #444; transform: translateY(-1px); }
+    .next-btn:active { transform: translateY(0); }
+
+    .fav-btn {
+      padding: 13px 20px;
+      background: white;
+      color: #e55;
+      border: 2px solid #e55;
+      border-radius: 12px;
+      font-size: 1rem;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .fav-btn:hover { background: #e55; color: white; }
+
+    .counter {
+      margin-top: 16px;
+      font-size: 0.85rem;
+      color: #aaa;
+    }
+
+    .favorites-section {
+      margin-top: 32px;
+      background: white;
+      border-radius: 16px;
+      padding: 20px 24px;
+      text-align: left;
+      box-shadow: 0 4px 16px rgba(0,0,0,0.08);
+    }
+
+    .favorites-section h2 {
+      font-size: 1rem;
+      color: #444;
+      margin-bottom: 12px;
+    }
+
+    .fav-list { list-style: none; }
+
+    .fav-list li {
+      font-size: 0.9rem;
+      color: #555;
+      padding: 10px 0;
+      border-bottom: 1px solid #f0f0f0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .fav-list li:last-child { border-bottom: none; }
+
+    .remove-fav {
+      background: none;
+      border: none;
+      color: #ccc;
+      cursor: pointer;
+      font-size: 1.1rem;
+    }
+
+    .remove-fav:hover { color: #e55; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>🧊 Icebreaker</h1>
+    <p class="subtitle">Break the ice with a random question!</p>
+
+    <div class="category-row" id="categoryRow"></div>
+
+    <div class="question-card cat-default" id="questionCard">
+      <p id="questionText">Click "Next Question" to get started!</p>
+    </div>
+
+    <div class="btn-row">
+      <button class="next-btn" onclick="nextQuestion()">Next Question</button>
+      <button class="fav-btn" onclick="saveFavorite()">♥ Save</button>
+    </div>
+
+    <p class="counter" id="counter"></p>
+
+    <div class="favorites-section" id="favSection" style="display:none">
+      <h2>Saved Questions</h2>
+      <ul class="fav-list" id="favList"></ul>
+    </div>
+  </div>
+
+  <script>
+    const questions = {
+      Fun: [
+        "If you could have any superpower, what would it be?",
+        "What's the weirdest food you've ever tried?",
+        "If you could only eat one food forever, what would it be?",
+        "What's your most-used emoji?",
+        "Would you rather explore space or the deep ocean?",
+        "What fictional world would you want to live in?",
+        "If animals could talk, which would be the rudest?",
+        "What's the funniest thing that happened to you this week?",
+        "If you had a theme song, what would it be?",
+        "What's a talent you have that most people don't know about?",
+      ],
+      Work: [
+        "What does your ideal workday look like?",
+        "What's a skill you'd love to learn this year?",
+        "What's the best advice you've ever received professionally?",
+        "What motivates you most at work?",
+        "What's a project you're really proud of?",
+        "Morning person or night owl — and how does it affect your work?",
+        "What's your go-to productivity hack?",
+        "If you could switch careers for a day, what would you try?",
+        "What's one thing you wish you knew when you started your career?",
+        "What does success look like to you?",
+      ],
+      Deep: [
+        "What's one thing you believe that most people disagree with?",
+        "If you could have dinner with anyone in history, who would it be?",
+        "What's a lesson you learned the hard way?",
+        "What's something you've changed your mind about recently?",
+        "If you could send a message to your 10-year-old self, what would you say?",
+        "What does happiness mean to you?",
+        "What's one thing on your bucket list?",
+        "Who has had the biggest influence on your life?",
+        "What's a book, film, or idea that changed how you think?",
+        "If you could relive one day of your life, which would it be?",
+      ],
+      Random: [
+        "Cats or dogs — and why?",
+        "What's your go-to karaoke song?",
+        "What was your first concert?",
+        "Beach, mountains, or city?",
+        "What show are you currently watching?",
+        "Coffee, tea, or neither?",
+        "What's a hobby you picked up recently?",
+        "Window seat or aisle seat?",
+        "What's your hidden talent?",
+        "If you could live anywhere in the world, where would it be?",
+      ],
+    };
+
+    let activeCategory = 'Fun';
+    let shown = new Set();
+    let current = null;
+    let favorites = JSON.parse(localStorage.getItem('ib_favorites') || '[]');
+
+    const catClass = { Fun: 'cat-fun', Work: 'cat-work', Deep: 'cat-deep', Random: 'cat-random' };
+
+    function buildCategories() {
+      const row = document.getElementById('categoryRow');
+      Object.keys(questions).forEach(cat => {
+        const btn = document.createElement('button');
+        btn.className = `category-btn ${catClass[cat]}` + (cat === activeCategory ? ' active' : '');
+        btn.textContent = cat;
+        btn.dataset.cat = cat;
+        btn.onclick = () => setCategory(cat);
+        row.appendChild(btn);
+      });
+    }
+
+    function setCategory(cat) {
+      activeCategory = cat;
+      shown.clear();
+      document.querySelectorAll('.category-btn').forEach(b => {
+        b.classList.toggle('active', b.dataset.cat === cat);
+      });
+      nextQuestion();
+    }
+
+    function nextQuestion() {
+      const pool = questions[activeCategory];
+      if (shown.size >= pool.length) shown.clear();
+
+      const pool2 = pool.map((q, i) => ({ q, i })).filter(({ i }) => !shown.has(i));
+      const { q, i } = pool2[Math.floor(Math.random() * pool2.length)];
+      shown.add(i);
+      current = q;
+
+      const card = document.getElementById('questionCard');
+      card.classList.add('animate');
+      setTimeout(() => {
+        document.getElementById('questionText').textContent = q;
+        card.className = `question-card ${catClass[activeCategory] || 'cat-default'}`;
+        card.style.opacity = 1;
+        card.style.transform = 'scale(1)';
+      }, 200);
+
+      document.getElementById('counter').textContent =
+        `${shown.size} / ${pool.length} questions shown`;
+    }
+
+    function saveFavorite() {
+      if (!current || favorites.includes(current)) return;
+      favorites.push(current);
+      localStorage.setItem('ib_favorites', JSON.stringify(favorites));
+      renderFavorites();
+    }
+
+    function removeFavorite(q) {
+      favorites = favorites.filter(f => f !== q);
+      localStorage.setItem('ib_favorites', JSON.stringify(favorites));
+      renderFavorites();
+    }
+
+    function renderFavorites() {
+      const section = document.getElementById('favSection');
+      const list = document.getElementById('favList');
+      section.style.display = favorites.length ? 'block' : 'none';
+      list.innerHTML = '';
+      favorites.forEach(q => {
+        const li = document.createElement('li');
+        li.innerHTML = `<span>${q}</span>`;
+        const btn = document.createElement('button');
+        btn.className = 'remove-fav';
+        btn.textContent = '×';
+        btn.onclick = () => removeFavorite(q);
+        li.appendChild(btn);
+        list.appendChild(li);
+      });
+    }
+
+    buildCategories();
+    renderFavorites();
+  </script>
+</body>
+</html>

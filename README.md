@@ -2,6 +2,8 @@
 
 A tiny single-page web app that serves up random icebreaker questions across four categories: **Fun**, **Work**, **Deep**, and **Random**. Pick a category, hit *Next Question*, and save the ones you like — favorites persist in `localStorage`.
 
+![Icebreaker app screenshot](screenshot.png)
+
 ## Live demo
 
 Deployed via GitHub Pages: <https://lnsadani.github.io/icebreaker/>
